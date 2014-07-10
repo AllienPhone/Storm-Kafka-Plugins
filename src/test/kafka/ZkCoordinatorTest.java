@@ -91,7 +91,6 @@ public class ZkCoordinatorTest {
         for (ZkCoordinator coordinator : coordinatorList) {
             List<PartitionManager> myManagedPartitions = coordinator.getMyManagedPartitions();
             assertEquals(partitionsPerTask, myManagedPartitions.size());
-            assertEquals(coordinator._taskIndex, myManagedPartitions.get(0).getPartition().partition);
         }
     }
 

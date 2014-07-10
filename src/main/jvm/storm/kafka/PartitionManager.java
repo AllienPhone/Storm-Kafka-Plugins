@@ -69,7 +69,7 @@ public class PartitionManager {
         String path = committedPath();
         try {
             Map<Object, Object> json = _state.readJSON(path);
-            LOG.info("Read partition information from: " + path +  "  --> " + json );
+            LOG.debug("Read partition information from: " + path +  "  --> " + json );
             if (json != null) {
                 jsonTopologyId = (String) ((Map<Object, Object>) json.get("topology")).get("id");
                 jsonOffset = (Long) json.get("offset");
@@ -82,23 +82,23 @@ public class PartitionManager {
 
         if (jsonTopologyId == null || jsonOffset == null) { // failed to parse JSON?
             _committedTo = currentOffset;
-            LOG.info("No partition information found, using configuration to determine offset");
+            LOG.debug("No partition information found, using configuration to determine offset");
         } else if (!topologyInstanceId.equals(jsonTopologyId) && spoutConfig.forceFromStart) {
             _committedTo = KafkaUtils.getOffset(_consumer, spoutConfig.topic, id.partition, spoutConfig.startOffsetTime);
-            LOG.info("Topology change detected and reset from start forced, using configuration to determine offset");
+            LOG.debug("Topology change detected and reset from start forced, using configuration to determine offset");
         } else {
             _committedTo = jsonOffset;
-            LOG.info("Read last commit offset from zookeeper: " + _committedTo + "; old topology_id: " + jsonTopologyId + " - new topology_id: " + topologyInstanceId );
+            LOG.debug("Read last commit offset from zookeeper: " + _committedTo + "; old topology_id: " + jsonTopologyId + " - new topology_id: " + topologyInstanceId );
         }
 
         if (currentOffset - _committedTo > spoutConfig.maxOffsetBehind || _committedTo <= 0) {
             LOG.info("Last commit offset from zookeeper: " + _committedTo);
             _committedTo = currentOffset;
-            LOG.info("Commit offset " + _committedTo + " is more than " +
+            LOG.debug("Commit offset " + _committedTo + " is more than " +
                     spoutConfig.maxOffsetBehind + " behind, resetting to startOffsetTime=" + spoutConfig.startOffsetTime);
         }
 
-        LOG.info("Starting Kafka " + _consumer.host() + ":" + id.partition + " from offset " + _committedTo);
+        LOG.debug("Starting Kafka " + _consumer.host() + ":" + id.partition + " from offset " + _committedTo);
         _emittedToOffset = _committedTo;
 
         _fetchAPILatencyMax = new CombinedMetric(new MaxMetric());
